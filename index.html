@@ -3,50 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>關係指南針 Pro</title>
+    <title>關係指南針 Pro+</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .card { @apply bg-white p-5 rounded-2xl shadow-sm mb-4 border border-gray-100; }
         select, input { @apply border border-gray-200 p-2 rounded-lg bg-white focus:ring-2 focus:ring-indigo-500 outline-none text-sm; }
         label { @apply text-xs font-bold text-gray-500 mb-1 block; }
+        .btn-primary { @apply bg-indigo-600 text-white py-2 px-4 rounded-xl font-bold shadow-md active:scale-95 transition-all; }
+        .btn-save { @apply bg-orange-500 text-white py-2 px-4 rounded-xl font-bold shadow-md active:scale-95 transition-all w-full mt-3; }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen pb-10 text-slate-800">
 
-    <nav class="bg-indigo-600 text-white p-4 sticky top-0 z-20 shadow-md">
-        <h1 class="text-lg font-black text-center tracking-widest">RELATIONSHIP COMPASS</h1>
+    <nav class="bg-indigo-700 text-white p-4 sticky top-0 z-20 shadow-md">
+        <h1 class="text-lg font-black text-center tracking-widest">RELATIONSHIP COMPASS PRO</h1>
     </nav>
 
     <main class="max-w-md mx-auto p-4">
         
         <section class="card border-t-4 border-orange-400">
-            <h2 class="font-bold mb-3 text-orange-600 flex items-center gap-2">
-                👤 我的基本設定
-            </h2>
-            <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <label>我的 MBTI</label>
-                    <select id="myMbti" class="w-full" onchange="saveMe()"></select>
-                </div>
-                <div>
-                    <label>我的生日</label>
-                    <div class="flex gap-1">
-                        <select id="myM" class="w-full" onchange="saveMe()"></select>
-                        <select id="myD" class="w-full" onchange="saveMe()"></select>
+            <h2 class="font-bold mb-3 text-orange-600 flex items-center gap-2">👤 我的資訊設定</h2>
+            <div class="space-y-3">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label>我的 MBTI</label>
+                        <select id="myMbti" class="w-full"></select>
+                    </div>
+                    <div>
+                        <label>我的生日</label>
+                        <div class="flex gap-1">
+                            <select id="myY" class="w-full" onchange="updateDays('myY','myM','myD')"></select>
+                            <select id="myM" class="w-full" onchange="updateDays('myY','myM','myD')"></select>
+                            <select id="myD" class="w-full"></select>
+                        </div>
                     </div>
                 </div>
+                <button onclick="saveMe()" class="btn-save">儲存我的資訊</button>
             </div>
-            <p class="text-[10px] text-gray-400 mt-2">* 設定後，系統將依此提供客製化相處建議</p>
         </section>
 
-        <hr class="my-6 border-gray-200">
-
         <section class="card">
-            <h2 class="font-bold mb-4 flex items-center gap-2 text-indigo-600">
-                ➕ 新增聯絡人
-            </h2>
+            <h2 class="font-bold mb-4 flex items-center gap-2 text-indigo-600">➕ 新增聯絡人</h2>
             <div class="space-y-4">
-                <input id="name" type="text" placeholder="聯絡人姓名" class="w-full">
+                <input id="name" type="text" placeholder="對方姓名" class="w-full">
                 <div class="grid grid-cols-2 gap-2">
                     <select id="mbti" class="w-full"></select>
                     <div class="flex gap-1">
@@ -55,9 +54,7 @@
                         <select id="day" class="w-1/4"></select>
                     </div>
                 </div>
-                <button onclick="saveContact()" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold shadow-lg active:scale-95 transition-all">
-                    分析相處密碼
-                </button>
+                <button onclick="saveContact()" class="w-full btn-primary bg-indigo-600">分析相處建議</button>
             </div>
         </section>
 
@@ -65,100 +62,114 @@
     </main>
 
     <script>
-        // --- 初始化選單數據 ---
         const mbtiList = ["INTJ","INTP","ENTJ","ENTP","INFJ","INFP","ENFJ","ENFP","ISTJ","ISFJ","ESTJ","ESFJ","ISTP","ISFP","ESTP","ESFP"];
         
         function initSelectors() {
-            const mbtiSelectors = [document.getElementById('myMbti'), document.getElementById('mbti')];
-            mbtiSelectors.forEach(s => {
+            const mbtiSels = [document.getElementById('myMbti'), document.getElementById('mbti')];
+            mbtiSels.forEach(s => {
                 s.innerHTML = '<option value="">MBTI</option>';
                 mbtiList.forEach(m => s.options.add(new Option(m, m)));
             });
 
             const currentYear = new Date().getFullYear();
-            const ySel = document.getElementById('year');
-            for(let i = currentYear; i >= 1950; i--) ySel.options.add(new Option(i, i));
+            [document.getElementById('myY'), document.getElementById('year')].forEach(s => {
+                for(let i = currentYear; i >= 1950; i--) s.options.add(new Option(i + "年", i));
+            });
 
-            const mSels = [document.getElementById('myM'), document.getElementById('month')];
-            mSels.forEach(s => {
-                s.innerHTML = '';
+            [document.getElementById('myM'), document.getElementById('month')].forEach(s => {
                 for(let i = 1; i <= 12; i++) s.options.add(new Option(i + "月", i));
             });
             
+            updateDays('myY', 'myM', 'myD');
             updateDays('year', 'month', 'day');
-            updateDays(null, 'myM', 'myD'); // 個人生日不強制年份
             loadMe();
         }
 
         function updateDays(yId, mId, dId) {
-            const y = yId ? document.getElementById(yId).value : 2000;
+            const y = document.getElementById(yId).value;
             const m = document.getElementById(mId).value;
             const dSel = document.getElementById(dId);
             const days = new Date(y, m, 0).getDate();
+            const currentVal = dSel.value;
             dSel.innerHTML = "";
             for(let i = 1; i <= days; i++) dSel.options.add(new Option(i + "日", i));
+            if(currentVal <= days) dSel.value = currentVal;
         }
 
-        // --- 核心邏輯：個人資訊 ---
+        const getZodiac = (m, d) => {
+            const signs = ["摩羯", "水瓶", "雙魚", "牡羊", "金牛", "雙子", "巨蟹", "獅子", "處女", "天秤", "天蠍", "射手", "摩羯"];
+            const lastDays = [19, 18, 20, 19, 20, 21, 22, 22, 22, 23, 22, 21];
+            return d > lastDays[m - 1] ? signs[m] : signs[m - 1];
+        };
+
+        const getElement = (zodiac) => {
+            if (["牡羊", "獅子", "射手"].includes(zodiac)) return "火";
+            if (["金牛", "處女", "摩羯"].includes(zodiac)) return "地";
+            if (["雙子", "天秤", "水瓶"].includes(zodiac)) return "風";
+            return "水";
+        };
+
         function saveMe() {
             const me = {
                 mbti: document.getElementById('myMbti').value,
-                m: document.getElementById('myM').value,
-                d: document.getElementById('myD').value
+                y: parseInt(document.getElementById('myY').value),
+                m: parseInt(document.getElementById('myM').value),
+                d: parseInt(document.getElementById('myD').value),
+                zodiac: getZodiac(parseInt(document.getElementById('myM').value), parseInt(document.getElementById('myD').value))
             };
             localStorage.setItem('me', JSON.stringify(me));
-            render(); // 重新渲染列表以更新對比建議
+            alert("個人設定已儲存！");
+            render();
         }
 
         function loadMe() {
             const me = JSON.parse(localStorage.getItem('me') || '{}');
-            if(me.mbti) document.getElementById('myMbti').value = me.mbti;
-            if(me.m) document.getElementById('myM').value = me.m;
-            updateDays(null, 'myM', 'myD');
-            if(me.d) document.getElementById('myD').value = me.d;
+            if(me.mbti) {
+                document.getElementById('myMbti').value = me.mbti;
+                document.getElementById('myY').value = me.y;
+                document.getElementById('myM').value = me.m;
+                updateDays('myY', 'myM', 'myD');
+                document.getElementById('myD').value = me.d;
+            }
         }
-
-        // --- 核心邏輯：計算建議 ---
-        const getLifeNum = (y, m, d) => {
-            let sum = `${y}${m}${d}`.split('').reduce((a, b) => a + parseInt(b), 0);
-            while (sum > 9 && sum !== 11 && sum !== 22) sum = sum.toString().split('').reduce((a,b)=>a+parseInt(b),0);
-            return sum;
-        };
 
         function generateAdvice(me, target) {
-            if(!me.mbti) return "⚠️ 請先在上方設定『我的資訊』以獲得對比建議。";
+            if(!me.mbti) return "⚠️ 請先儲存您的個人資訊。";
             
             let tips = [];
-            // MBTI 對比
-            const meT = me.mbti.includes('T'), targetT = target.mbti.includes('T');
-            const meE = me.mbti.includes('E'), targetE = target.mbti.includes('E');
-
-            if (meT && !targetT) tips.push("💡 對方較感性，交流時請先表達關心，避免直接指出錯誤。");
-            if (!meT && targetT) tips.push("⚖️ 對方重視邏輯，建議對話時精簡事實，收斂情緒化表達。");
-            if (meE && !targetE) tips.push("🔇 你較外向，請留給對方更多思考與反應的留白時間。");
-
-            // 星座/靈數對比 (範例：數值差距)
-            const diff = Math.abs(getLifeNum(2000, me.m, me.d) - target.lifeNum);
-            if (diff === 0) tips.push("✨ 你們生命頻率相近，容易產生共鳴。");
             
-            return tips.length > 0 ? tips.join('<br>') : "🌱 保持平常心，用真誠建立連結。";
+            // 1. 年齡分析
+            const ageDiff = me.y - target.y; // 正數代表對方比你大
+            if (ageDiff >= 10) tips.push(`👴 對方是前輩輩分，建議保持禮貌，多請益經驗。`);
+            else if (ageDiff <= -10) tips.push(`👶 對方年紀較輕，建議用引導代替說教，多聊流行話題。`);
+            else tips.push(`🤝 年齡相仿，可以用更平等、像朋友的方式相處。`);
+
+            // 2. MBTI 對比
+            if (me.mbti.includes('T') && !target.mbti.includes('T')) tips.push("💡 對方重感情，說話前先肯定對方的感受。");
+            if (!me.mbti.includes('T') && target.mbti.includes('T')) tips.push("⚖️ 對方重邏輯，溝通時請列出 1.2.3 點事實。");
+
+            // 3. 星座元素對比
+            const myEl = getElement(me.zodiac);
+            const taEl = getElement(target.zodiac);
+            if (myEl === "火" && taEl === "水") tips.push("🌊 你的熱情可能給對方壓力，請放慢節奏。");
+            if (myEl === "地" && taEl === "風") tips.push("🍃 對方想法跳躍，不要試圖用規矩約束他。");
+
+            return tips.join('<br>');
         }
 
-        // --- 聯絡人管理 ---
         function saveContact() {
             const name = document.getElementById('name').value;
             const mbti = document.getElementById('mbti').value;
-            if(!name || !mbti) return alert("請填寫姓名與MBTI");
+            const y = parseInt(document.getElementById('year').value);
+            const m = parseInt(document.getElementById('month').value);
+            const d = parseInt(document.getElementById('day').value);
 
-            const y = document.getElementById('year').value;
-            const m = document.getElementById('month').value;
-            const d = document.getElementById('day').value;
-            
+            if(!name || !mbti) return alert("請完整輸入");
+
             const contact = {
                 id: Date.now(),
-                name, mbti,
-                bday: `${m}/${d}`,
-                lifeNum: getLifeNum(y, m, d)
+                name, mbti, y, m, d,
+                zodiac: getZodiac(m, d)
             };
 
             let contacts = JSON.parse(localStorage.getItem('contacts') || '[]');
@@ -176,12 +187,12 @@
                 <div class="card border-l-4 border-indigo-500">
                     <div class="flex justify-between items-start mb-2">
                         <div>
-                            <h3 class="font-bold text-lg">${c.name} <span class="text-indigo-500 text-sm">[${c.mbti}]</span></h3>
-                            <p class="text-xs text-gray-400">生日：${c.bday} | 生命靈數：${c.lifeNum}</p>
+                            <h3 class="font-bold text-lg">${c.name} <span class="text-indigo-500 text-xs">[${c.mbti}]</span></h3>
+                            <p class="text-[10px] text-gray-400 font-mono">${c.y}年 | ${c.zodiac}座 (${getElement(c.zodiac)}象)</p>
                         </div>
                         <button onclick="deleteContact(${c.id})" class="text-gray-300">✕</button>
                     </div>
-                    <div class="bg-indigo-50 p-3 rounded-lg text-sm text-indigo-900 leading-relaxed">
+                    <div class="bg-indigo-50 p-3 rounded-lg text-xs text-indigo-900 leading-relaxed border border-indigo-100">
                         ${generateAdvice(me, c)}
                     </div>
                 </div>
