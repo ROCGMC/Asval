@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>關係指南針 - 聯絡人相處提示</title>
+    <link rel="manifest" href="manifest.json">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .card { @apply bg-white p-4 rounded-xl shadow-md mb-4 border border-gray-100; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen pb-20">
+
+    <nav class="bg-indigo-600 text-white p-4 sticky top-0 z-10 shadow-lg">
+        <h1 class="text-xl font-bold text-center">關係指南針 Relationship Compass</h1>
+    </nav>
+
+    <main class="max-w-md mx-auto p-4">
+        <section class="card">
+            <h2 class="font-bold mb-3 text-indigo-700">新增聯絡人</h2>
+            <div class="space-y-3">
+                <input id="name" type="text" placeholder="姓名" class="w-full border p-2 rounded">
+                <div class="flex gap-2">
+                    <select id="mbti" class="w-1/2 border p-2 rounded">
+                        <option value="">選擇 MBTI</option>
+                        <option value="INTJ">INTJ</option><option value="INTP">INTP</option>
+                        <option value="ENTJ">ENTJ</option><option value="ENTP">ENTP</option>
+                        <option value="INFJ">INFJ</option><option value="INFP">INFP</option>
+                        <option value="ENFJ">ENFJ</option><option value="ENFP">ENFP</option>
+                        <option value="ISTJ">ISTJ</option><option value="ISFJ">ISFJ</option>
+                        <option value="ESTJ">ESTJ</option><option value="ESFJ">ESFJ</option>
+                        <option value="ISTP">ISTP</option><option value="ISFP">ISFP</option>
+                        <option value="ESTP">ESTP</option><option value="ESFP">ESFP</option>
+                    </select>
+                    <input id="birthday" type="date" class="w-1/2 border p-2 rounded">
+                </div>
+                <button onclick="saveContact()" class="w-full bg-indigo-500 text-white py-2 rounded-lg font-bold">儲存並分析</button>
+            </div>
+        </section>
+
+        <div id="contactList" class="mt-6">
+            </div>
+    </main>
+
+    <script>
+        const getZodiac = (date) => {
+            const d = new Date(date);
+            const m = d.getMonth() + 1;
+            const day = d.getDate();
+            const signs = ["摩羯", "水瓶", "雙魚", "牡羊", "金牛", "雙子", "巨蟹", "獅子", "處女", "天秤", "天蠍", "射手", "摩羯"];
+            const last_days = [19, 18, 20, 19, 20, 21, 22, 22, 22, 23, 22, 21];
+            return day > last_days[m - 1] ? signs[m] : signs[m - 1];
+        };
+
+        const getLifePathNumber = (date) => {
+            const digits = date.replace(/-/g, '');
+            let sum = digits.split('').reduce((a, b) => parseInt(a) + parseInt(b), 0);
+            while (sum > 9 && sum !== 11 && sum !== 22) {
+                sum = sum.toString().split('').reduce((a, b) => parseInt(a) + parseInt(b), 0);
+            }
+            return sum;
+        };
+
+        const getAdvice = (mbti, zodiac, lifeNum) => {
+            let advice = "";
+            // MBTI Logic
+            if (mbti.includes('I')) advice += "【溝通】給予私人空間，多用文字。";
+            else advice += "【溝通】直接對話，多給予正面回應。";
+
+            // Zodiac Logic
+            if (["巨蟹", "天蠍", "雙魚"].includes(zodiac)) advice += "【情緒】注重感性連結，避免批評。";
+            else if (["牡羊", "獅子", "射手"].includes(zodiac)) advice += "【效率】快狠準，讚美其行動力。";
+            
+            // Life Path Logic
+            if (lifeNum === 1) advice += "【核心】尊重其領導意願。";
+            if (lifeNum === 7) advice += "【核心】避免打探隱私，保持知性交流。";
+
+            return advice || "保持真誠，觀察其細微需求。";
+        };
+
+        function saveContact() {
+            const name = document.getElementById('name').value;
+            const mbti = document.getElementById('mbti').value;
+            const bday = document.getElementById('birthday').value;
+
+            if (!name || !mbti || !bday) return alert("請填寫完整資訊");
+
+            const contact = {
+                id: Date.now(),
+                name, mbti, bday,
+                zodiac: getZodiac(bday),
+                lifeNum: getLifePathNumber(bday),
+                advice: getAdvice(mbti, getZodiac(bday), getLifePathNumber(bday))
+            };
+
+            let contacts = JSON.parse(localStorage.getItem('contacts') || '[]');
+            contacts.push(contact);
+            localStorage.setItem('contacts', JSON.stringify(contacts));
+            render();
+        }
+
+        function render() {
+            const list = document.getElementById('contactList');
+            const contacts = JSON.parse(localStorage.getItem('contacts') || '[]');
+            list.innerHTML = contacts.map(c => `
+                <div class="card border-l-4 border-indigo-500">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="text-lg font-bold">${c.name} <span class="text-sm font-normal text-gray-500">(${c.mbti})</span></h3>
+                            <p class="text-xs text-gray-400">${c.zodiac}座 | 生命靈數 ${c.lifeNum}</p>
+                        </div>
+                        <button onclick="deleteContact(${c.id})" class="text-red-300">✕</button>
+                    </div>
+                    <div class="mt-3 text-sm text-gray-700 bg-indigo-50 p-2 rounded">
+                        <strong>建議：</strong> ${c.advice}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function deleteContact(id) {
+            let contacts = JSON.parse(localStorage.getItem('contacts') || '[]');
+            contacts = contacts.filter(c => c.id !== id);
+            localStorage.setItem('contacts', JSON.stringify(contacts));
+            render();
+        }
+
+        render();
+    </script>
+</body>
+</html>
