@@ -3,26 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>關係指南針 Pro+</title>
+    <title>關係指南針 Ultimate</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .card { @apply bg-white p-5 rounded-2xl shadow-sm mb-4 border border-gray-100; }
         select, input { @apply border border-gray-200 p-2 rounded-lg bg-white focus:ring-2 focus:ring-indigo-500 outline-none text-sm; }
         label { @apply text-xs font-bold text-gray-500 mb-1 block; }
-        .btn-primary { @apply bg-indigo-600 text-white py-2 px-4 rounded-xl font-bold shadow-md active:scale-95 transition-all; }
-        .btn-save { @apply bg-orange-500 text-white py-2 px-4 rounded-xl font-bold shadow-md active:scale-95 transition-all w-full mt-3; }
+        .tag { @apply text-[10px] px-2 py-0.5 rounded-md font-bold mr-1; }
+        .analysis-item { @apply mb-2 pb-2 border-b border-white/50 last:border-0; }
+        .status-green { @apply border-l-8 border-green-500 bg-green-50; }
+        .status-yellow { @apply border-l-8 border-yellow-500 bg-yellow-50; }
+        .status-red { @apply border-l-8 border-red-500 bg-red-50; }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen pb-10 text-slate-800">
+<body class="bg-slate-100 min-h-screen pb-10 text-slate-800">
 
-    <nav class="bg-indigo-700 text-white p-4 sticky top-0 z-20 shadow-md">
-        <h1 class="text-lg font-black text-center tracking-widest">RELATIONSHIP COMPASS PRO</h1>
+    <nav class="bg-slate-900 text-white p-4 sticky top-0 z-20 shadow-lg">
+        <h1 class="text-lg font-black text-center tracking-tighter">RELATIONSHIP MASTER v3.0</h1>
     </nav>
 
     <main class="max-w-md mx-auto p-4">
         
-        <section class="card border-t-4 border-orange-400">
-            <h2 class="font-bold mb-3 text-orange-600 flex items-center gap-2">👤 我的資訊設定</h2>
+        <section class="card border-t-4 border-indigo-500">
+            <h2 class="font-bold mb-3 text-indigo-600 flex items-center gap-2">👤 我的檔案</h2>
             <div class="space-y-3">
                 <div class="grid grid-cols-2 gap-3">
                     <div>
@@ -30,22 +33,22 @@
                         <select id="myMbti" class="w-full"></select>
                     </div>
                     <div>
-                        <label>我的生日</label>
+                        <label>出生年月日</label>
                         <div class="flex gap-1">
-                            <select id="myY" class="w-full" onchange="updateDays('myY','myM','myD')"></select>
-                            <select id="myM" class="w-full" onchange="updateDays('myY','myM','myD')"></select>
-                            <select id="myD" class="w-full"></select>
+                            <select id="myY" class="w-1/2" onchange="updateDays('myY','myM','myD')"></select>
+                            <select id="myM" class="w-1/4" onchange="updateDays('myY','myM','myD')"></select>
+                            <select id="myD" class="w-1/4"></select>
                         </div>
                     </div>
                 </div>
-                <button onclick="saveMe()" class="btn-save">儲存我的資訊</button>
+                <button onclick="saveMe()" class="w-full bg-indigo-600 text-white py-2 rounded-xl font-bold">儲存我的資訊</button>
             </div>
         </section>
 
         <section class="card">
-            <h2 class="font-bold mb-4 flex items-center gap-2 text-indigo-600">➕ 新增聯絡人</h2>
+            <h2 class="font-bold mb-4 text-slate-600">➕ 新增對象</h2>
             <div class="space-y-4">
-                <input id="name" type="text" placeholder="對方姓名" class="w-full">
+                <input id="name" type="text" placeholder="對象姓名" class="w-full">
                 <div class="grid grid-cols-2 gap-2">
                     <select id="mbti" class="w-full"></select>
                     <div class="flex gap-1">
@@ -54,7 +57,7 @@
                         <select id="day" class="w-1/4"></select>
                     </div>
                 </div>
-                <button onclick="saveContact()" class="w-full btn-primary bg-indigo-600">分析相處建議</button>
+                <button onclick="saveContact()" class="w-full bg-slate-800 text-white py-3 rounded-xl font-bold">開始交叉分析</button>
             </div>
         </section>
 
@@ -71,13 +74,13 @@
                 mbtiList.forEach(m => s.options.add(new Option(m, m)));
             });
 
-            const currentYear = new Date().getFullYear();
+            const curY = new Date().getFullYear();
             [document.getElementById('myY'), document.getElementById('year')].forEach(s => {
-                for(let i = currentYear; i >= 1950; i--) s.options.add(new Option(i + "年", i));
+                for(let i = curY; i >= 1950; i--) s.options.add(new Option(i, i));
             });
 
             [document.getElementById('myM'), document.getElementById('month')].forEach(s => {
-                for(let i = 1; i <= 12; i++) s.options.add(new Option(i + "月", i));
+                for(let i = 1; i <= 12; i++) s.options.add(new Option(i, i));
             });
             
             updateDays('myY', 'myM', 'myD');
@@ -90,10 +93,10 @@
             const m = document.getElementById(mId).value;
             const dSel = document.getElementById(dId);
             const days = new Date(y, m, 0).getDate();
-            const currentVal = dSel.value;
+            const oldVal = dSel.value;
             dSel.innerHTML = "";
-            for(let i = 1; i <= days; i++) dSel.options.add(new Option(i + "日", i));
-            if(currentVal <= days) dSel.value = currentVal;
+            for(let i = 1; i <= days; i++) dSel.options.add(new Option(i, i));
+            if(oldVal <= days) dSel.value = oldVal;
         }
 
         const getZodiac = (m, d) => {
@@ -102,11 +105,10 @@
             return d > lastDays[m - 1] ? signs[m] : signs[m - 1];
         };
 
-        const getElement = (zodiac) => {
-            if (["牡羊", "獅子", "射手"].includes(zodiac)) return "火";
-            if (["金牛", "處女", "摩羯"].includes(zodiac)) return "地";
-            if (["雙子", "天秤", "水瓶"].includes(zodiac)) return "風";
-            return "水";
+        const getLifeNum = (y, m, d) => {
+            let s = `${y}${m}${d}`.split('').reduce((a, b) => a + parseInt(b), 0);
+            while (s > 9 && s !== 11 && s !== 22) s = s.toString().split('').reduce((a,b)=>a+parseInt(b),0);
+            return s;
         };
 
         function saveMe() {
@@ -117,13 +119,13 @@
                 d: parseInt(document.getElementById('myD').value),
                 zodiac: getZodiac(parseInt(document.getElementById('myM').value), parseInt(document.getElementById('myD').value))
             };
-            localStorage.setItem('me', JSON.stringify(me));
-            alert("個人設定已儲存！");
+            localStorage.setItem('meMaster', JSON.stringify(me));
+            alert("個人資料已更新！");
             render();
         }
 
         function loadMe() {
-            const me = JSON.parse(localStorage.getItem('me') || '{}');
+            const me = JSON.parse(localStorage.getItem('meMaster') || '{}');
             if(me.mbti) {
                 document.getElementById('myMbti').value = me.mbti;
                 document.getElementById('myY').value = me.y;
@@ -133,28 +135,55 @@
             }
         }
 
-        function generateAdvice(me, target) {
-            if(!me.mbti) return "⚠️ 請先儲存您的個人資訊。";
+        function analyze(me, target) {
+            if(!me.mbti) return { status: 'yellow', html: '請先設定您的個人資訊' };
             
-            let tips = [];
-            
+            let score = 50; // 基礎分
+            let reports = [];
+
             // 1. 年齡分析
-            const ageDiff = me.y - target.y; // 正數代表對方比你大
-            if (ageDiff >= 10) tips.push(`👴 對方是前輩輩分，建議保持禮貌，多請益經驗。`);
-            else if (ageDiff <= -10) tips.push(`👶 對方年紀較輕，建議用引導代替說教，多聊流行話題。`);
-            else tips.push(`🤝 年齡相仿，可以用更平等、像朋友的方式相處。`);
+            const gap = me.y - target.y;
+            let ageReport = `差距 ${Math.abs(gap)} 歲。`;
+            if (Math.abs(gap) <= 3) { ageReport += "同齡層，話題容易共鳴。"; score += 10; }
+            else if (gap > 10) { ageReport += "對方是長輩，需注意禮節與傳統價值。"; score -= 5; }
+            else if (gap < -10) { ageReport += "對方是後輩，建議展現包容力。"; score -= 5; }
+            reports.push({ title: '📅 年齡分析', content: ageReport });
 
-            // 2. MBTI 對比
-            if (me.mbti.includes('T') && !target.mbti.includes('T')) tips.push("💡 對方重感情，說話前先肯定對方的感受。");
-            if (!me.mbti.includes('T') && target.mbti.includes('T')) tips.push("⚖️ 對方重邏輯，溝通時請列出 1.2.3 點事實。");
+            // 2. MBTI 分析
+            let mbtiReport = "";
+            const isTFMatch = me.mbti.includes('T') === target.mbti.includes('T');
+            if(isTFMatch) { mbtiReport = "決策邏輯相似，溝通效率高。"; score += 15; }
+            else { mbtiReport = "邏輯與情感對碰，容易發生誤會。"; score -= 15; }
+            reports.push({ title: '🧠 MBTI 分析', content: `[${target.mbti}] ${mbtiReport}` });
 
-            // 3. 星座元素對比
-            const myEl = getElement(me.zodiac);
-            const taEl = getElement(target.zodiac);
-            if (myEl === "火" && taEl === "水") tips.push("🌊 你的熱情可能給對方壓力，請放慢節奏。");
-            if (myEl === "地" && taEl === "風") tips.push("🍃 對方想法跳躍，不要試圖用規矩約束他。");
+            // 3. 星座分析
+            const elMap = {"火":["牡羊","獅子","射手"],"地":["金牛","處女","摩羯"],"風":["雙子","天秤","水瓶"],"水":["巨蟹","天蠍","雙魚"]};
+            const getEl = z => Object.keys(elMap).find(k => elMap[k].includes(z));
+            const myEl = getEl(me.zodiac), taEl = getEl(target.zodiac);
+            let zReport = "";
+            if(myEl === taEl) { zReport = `同屬${myEl}象，性格底色一致。`; score += 10; }
+            else if((myEl==='火'&&taEl==='風')||(myEl==='風'&&taEl==='火')) { zReport = "火風相遇，能激發對方的熱情。"; score += 5; }
+            else if((myEl==='地'&&taEl==='水')||(myEl==='水'&&taEl==='地')) { zReport = "水地滋養，關係穩定持久。"; score += 5; }
+            else { zReport = "元素差異較大，需時間磨合。"; score -= 10; }
+            reports.push({ title: '✨ 星座分析', content: `${target.zodiac}座(${taEl}象)：${zReport}` });
 
-            return tips.join('<br>');
+            // 4. 靈數分析
+            const taLife = getLifeNum(target.y, target.m, target.d);
+            const myLife = getLifeNum(me.y, me.m, me.d);
+            let lReport = `靈數 ${taLife}。`;
+            if(taLife === myLife) { lReport += "靈魂頻率高度一致。"; score += 20; }
+            else { lReport += "不同的生命課題，可互相學習。"; }
+            reports.push({ title: '🔢 靈數分析', content: lReport });
+
+            let status = 'yellow';
+            if(score >= 70) status = 'green';
+            else if(score < 40) status = 'red';
+
+            return {
+                status,
+                score,
+                html: reports.map(r => `<div class="analysis-item"><strong>${r.title}：</strong><br>${r.content}</div>`).join('')
+            };
         }
 
         function saveContact() {
@@ -164,44 +193,47 @@
             const m = parseInt(document.getElementById('month').value);
             const d = parseInt(document.getElementById('day').value);
 
-            if(!name || !mbti) return alert("請完整輸入");
+            if(!name || !mbti) return alert("請填寫姓名與MBTI");
 
-            const contact = {
-                id: Date.now(),
-                name, mbti, y, m, d,
-                zodiac: getZodiac(m, d)
-            };
-
-            let contacts = JSON.parse(localStorage.getItem('contacts') || '[]');
-            contacts.unshift(contact);
-            localStorage.setItem('contacts', JSON.stringify(contacts));
+            const contact = { id: Date.now(), name, mbti, y, m, d, zodiac: getZodiac(m, d) };
+            let list = JSON.parse(localStorage.getItem('contactsMaster') || '[]');
+            list.unshift(contact);
+            localStorage.setItem('contactsMaster', JSON.stringify(list));
             render();
         }
 
         function render() {
-            const me = JSON.parse(localStorage.getItem('me') || '{}');
-            const list = document.getElementById('contactList');
-            const contacts = JSON.parse(localStorage.getItem('contacts') || '[]');
+            const me = JSON.parse(localStorage.getItem('meMaster') || '{}');
+            const list = JSON.parse(localStorage.getItem('contactsMaster') || '[]');
+            const container = document.getElementById('contactList');
             
-            list.innerHTML = contacts.map(c => `
-                <div class="card border-l-4 border-indigo-500">
-                    <div class="flex justify-between items-start mb-2">
-                        <div>
-                            <h3 class="font-bold text-lg">${c.name} <span class="text-indigo-500 text-xs">[${c.mbti}]</span></h3>
-                            <p class="text-[10px] text-gray-400 font-mono">${c.y}年 | ${c.zodiac}座 (${getElement(c.zodiac)}象)</p>
+            container.innerHTML = list.map(c => {
+                const res = analyze(me, c);
+                const statusText = { 'green': '匹配超高 🟢', 'yellow': '正常相處 🟡', 'red': '挑戰性高 🔴' }[res.status];
+                
+                return `
+                    <div class="card status-${res.status} animate-fade-in">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="font-black text-xl">${c.name}</h3>
+                                <div class="mt-1">
+                                    <span class="tag bg-slate-800 text-white">${statusText}</span>
+                                    <span class="tag bg-indigo-100 text-indigo-700">得分: ${res.score}</span>
+                                </div>
+                            </div>
+                            <button onclick="deleteContact(${c.id})" class="text-slate-300 hover:text-red-500">✕</button>
                         </div>
-                        <button onclick="deleteContact(${c.id})" class="text-gray-300">✕</button>
+                        <div class="text-xs text-slate-600 leading-relaxed">
+                            ${res.html}
+                        </div>
                     </div>
-                    <div class="bg-indigo-50 p-3 rounded-lg text-xs text-indigo-900 leading-relaxed border border-indigo-100">
-                        ${generateAdvice(me, c)}
-                    </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         function deleteContact(id) {
-            let contacts = JSON.parse(localStorage.getItem('contacts') || '[]');
-            localStorage.setItem('contacts', JSON.stringify(contacts.filter(c => c.id !== id)));
+            let list = JSON.parse(localStorage.getItem('contactsMaster') || '[]');
+            localStorage.setItem('contactsMaster', JSON.stringify(list.filter(c => c.id !== id)));
             render();
         }
 
